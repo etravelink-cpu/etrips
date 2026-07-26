@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/img/logo.png">
+  <title>在线咨询 · Etrips 国安易游</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+  <div class="float-bar" id="float-bar"></div>
+
+  <section class="section" style="padding-top:80px">
+    <div class="container">
+      <a href="index.html" style="display:inline-block;margin-bottom:16px;color:#1b4f8a;font-weight:700;text-decoration:none">← 返回首页</a>
+      <h1 class="section-title" style="text-align:center" data-i18n="ct.title">在线咨询 / 行程预订</h1>
+      <p style="text-align:center;color:var(--muted);margin:0 0 28px" data-i18n="ct.intro">提交后咨询将通过邮件直接发送给客服，我们会尽快回复；也可扫描下方二维码添加微信客服。</p>
+
+      <div class="form-card" style="max-width:640px">
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-row" style="margin:0">
+            <label for="c-name" data-i18n="form.name">姓名 / Name</label>
+            <input id="c-name" type="text" placeholder="您的称呼" data-i18n-ph="ct.name.ph" autocomplete="name">
+          </div>
+          <div class="form-row" style="margin:0">
+            <label for="c-email" data-i18n="bk.email">客人邮箱 / Email</label>
+            <input id="c-email" type="email" placeholder="用于接收回复（选填）" data-i18n-ph="ct.email.ph" autocomplete="email">
+          </div>
+          <div class="form-row" style="margin:0">
+            <label for="c-phone" data-i18n="bk.phone">联系电话 / Phone</label>
+            <input id="c-phone" type="tel" placeholder="微信或手机号" data-i18n-ph="ct.phone.ph" autocomplete="tel">
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:16px">
+          <label for="c-msg" data-i18n="ct.msg">咨询内容 / Message</label>
+          <textarea id="c-msg" rows="6" placeholder="请描述您想咨询的行程、人数、预算等" data-i18n-ph="ct.msg.ph"></textarea>
+        </div>
+        <div style="text-align:center;margin-top:22px">
+          <button type="button" class="btn btn-primary" onclick="submitConsult()" data-i18n="ct.submit">提交咨询</button>
+        </div>
+        <div id="c-tip" style="text-align:center;color:var(--sky-text);margin-top:14px;font-size:14px"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function(){
+      const q = new URLSearchParams(location.search);
+      const route = q.get('route') || '';
+      const date = q.get('date') || '';
+      const ta = document.getElementById('c-msg');
+      if(route){
+        let pre = '我想咨询：【' + route + '】';
+        if(date) pre += '\n意向出发日期：' + date;
+        pre += '\n\n';
+        ta.value = pre;
+        ta.focus();
+      }
+      if(typeof emailjs !== 'undefined'){ try{ emailjs.init('nZv17YnCO1xz5uLPZ'); }catch(e){} }
+    })();
+
+    function submitConsult(){
+      const name = document.getElementById('c-name').value.trim();
+      const email = document.getElementById('c-email').value.trim();
+      const phone = document.getElementById('c-phone').value.trim();
+      const msg = document.getElementById('c-msg').value.trim();
+      const tip = document.getElementById('c-tip');
+      if(!phone){ tip.style.color='#e23b3b'; tip.textContent='请留下联系电话或微信，方便客服与您确认。'; return; }
+      let lines = ['【在线咨询】Etrips 国安易游'];
+      if(name) lines.push('称呼：' + name);
+      if(email) lines.push('邮箱：' + email);
+      lines.push('联系方式：' + phone);
+      if(msg) lines.push('咨询内容：\n' + msg);
+      const body = lines.join('\n');
+      // ---- 真实发送：EmailJS（纯前端）----
+      const EMAILJS = { serviceID:'service_o6p45jq', templateID:'template_yxlb4dp', autoReplyID:'template_p9ks58v', publicKey:'nZv17YnCO1xz5uLPZ', toEmail:'etripsetrips@gmail.com' };
+      if(typeof emailjs === 'undefined'){
+        tip.style.color='#e23b3b';
+        tip.textContent='邮件组件加载失败，请检查网络后重试，或扫描下方二维码加微信客服。';
+        return;
+      }
+      tip.style.color='#0B6A9E'; tip.textContent='正在发送…';
+      try {
+        emailjs.send(EMAILJS.serviceID, EMAILJS.templateID, {
+          route: '在线咨询', date: '', name: name, phone: phone, email: email, remark: msg,
+          pax: '', body: body
+        }).then(()=>{
+          if(email && EMAILJS.autoReplyID){
+            emailjs.send(EMAILJS.serviceID, EMAILJS.autoReplyID, {
+              name: name, email: email, body: body, route: '在线咨询', date: ''
+            }).catch(()=>{});
+          }
+          tip.style.color='#1aa06b'; tip.textContent='咨询已发送！客服会尽快与您联系可扫码添加微信。';
+        }).catch((err)=>{
+          tip.style.color='#e23b3b'; tip.textContent='发送失败（'+(err&&err.status||'网络')+'），请稍后重试或扫描下方二维码加微信客服。';
+          console.error(err);
+        });
+      } catch(e){
+        tip.style.color='#e23b3b'; tip.textContent='发送初始化失败：'+(e.message||e)+'，请刷新页面后重试。';
+        console.error(e);
+      }
+    }
+    window.submitConsult = submitConsult;
+  </script>
+  <script src="assets/js/motion.js"></script>
+</body>
+</html>

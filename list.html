@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/img/logo.png">
+  <title>Etrips 国安易游 | 易行天下，奔赴山海 · 线路列表</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>if(/[?&]d=/.test(location.search))document.documentElement.classList.add("has-region");</script>
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+  <div class="float-bar" id="float-bar"></div>
+
+  <section class="section" style="padding-top:80px">
+    <div class="container">
+      <a href="javascript:void(0)" id="back-btn" class="back-btn" hidden onclick="goBack()" data-i18n="btn.back">← 返回</a>
+      <h2 class="section-title" id="hot-title" data-i18n="home.hot.title">爆款精选行程</h2>
+      <div class="trust-line"><span data-i18n="list.trust1">中文领队</span><span data-i18n="list.trust2">悉尼持牌旅行社</span><span data-i18n="list.trust3">小团与私人订制</span><span data-i18n="list.trust4">微信一对一客服</span></div>
+
+      <!-- 目的地分区行程规划（按 ?d= 自动取用，统一格式） -->
+      <div id="region-plan" class="region-plan" hidden></div>
+
+      <div class="grid grid-3" id="list-grid"></div>
+
+      <!-- 智能筛选栏（移至底部） -->
+      <div class="form-card" id="filter-bar" style="margin:36px 0 28px">
+        <div class="grid grid-3" style="gap:14px">
+          <div class="form-row" style="margin:0">
+            <label data-i18n="list.filter.days">出行天数</label>
+            <select id="f-days"><option value="" data-i18n="list.filter.all">全部</option>
+              <option value="s">≤7 天</option><option value="m">8-10 天</option><option value="l">≥11 天</option></select>
+          </div>
+          <div class="form-row" style="margin:0">
+            <label data-i18n="list.filter.month">出行月份</label>
+            <select id="f-month"><option value="" data-i18n="list.filter.all">全部</option>
+              <option value="summer">夏季</option><option value="year">全年</option></select>
+          </div>
+          <div class="form-row" style="margin:0">
+            <label data-i18n="list.filter.budget">预算区间</label>
+            <select id="f-budget"><option value="" data-i18n="list.filter.all">全部</option>
+              <option value="low">经济</option><option value="medium">中端</option><option value="high">高端</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ + 咨询入口 -->
+      <div class="home-section-head" style="margin-top:56px;margin-bottom:20px">
+        <span class="eyebrow">FAQ</span>
+        <h3 class="section-title" style="font-size:26px;margin-bottom:0" data-i18n="list.faq.title">常见问题</h3>
+      </div>
+      <details class="faq-item"><summary>行程可以私人定制吗？</summary><div class="ans">可以，所有线路支持私家定制，详见定制游页面。</div></details>
+      <details class="faq-item"><summary>价格包含机票吗？</summary><div class="ans">标准团含国际/内陆机票含税及行李额度，详见各线路「额外信息」。</div></details>
+      <details class="faq-item"><summary>单人出行怎么算？</summary><div class="ans">单人需补单人房差，或安排拼房，详见费用说明。</div></details>
+      <div style="text-align:center;margin-top:20px">
+        <a href="contact.html" class="btn btn-primary" data-i18n="btn.consult">在线咨询</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/region-plans.js"></script>
+  <script src="assets/js/region-china.js@v=20260726"></script>
+  <script src="assets/js/region-australia.js@v=20260726"></script>
+  <script src="assets/js/region-asia.js@v=20260726"></script>
+  <script src="assets/js/region-europe.js@v=20260726"></script>
+  <script src="assets/js/region-america.js@v=20260726"></script>
+  <script src="assets/js/region-nz.js@v=20260726"></script>
+  <script src="assets/js/region-special.js@v=20260726"></script>
+  <script src="assets/js/region-cruise.js@v=20260726"></script>
+  <script src="assets/js/region-island.js@v=20260726"></script>
+  <script src="assets/js/region-other.js@v=20260726"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="assets/js/list.js"></script>
+  <script src="assets/js/motion.js"></script>
+</body>
+</html>

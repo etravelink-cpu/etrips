@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/img/logo.png">
+  <title>预订请求 · Etrips 国安易游</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .bk-wrap{max-width:680px;margin:0 auto}
+    .bk-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+      padding:28px 30px;box-shadow:var(--shadow-soft)}
+    .bk-detail{margin-top:24px}
+  </style>
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+  <div class="float-bar" id="float-bar"></div>
+
+  <section class="section" style="padding-top:80px">
+    <div class="container">
+      <h1 class="section-title" style="text-align:center" data-i18n="bk.title">行程预订请求</h1>
+      <a href="index.html" class="back-btn" style="display:inline-block;margin:0 auto 18px" data-i18n="bk.back">← 返回主页</a>
+      <p style="text-align:center;color:var(--muted);margin:0 0 24px" data-i18n="bk.intro">填写路线、日期与乘客信息，提交后行程单将随邮件发至客服，客服将尽快与您确认余位与价格。</p>
+
+      <div class="bk-wrap">
+        <div class="bk-card">
+          <div class="bk-row">
+            <label for="bk-route"><span data-i18n="bk.route">路线 / Route</span><span class="req">*</span></label>
+            <input id="bk-route" class="bk-input" type="text" placeholder="如：蓝山有氧+动物园一日游" data-i18n-ph="bk.route.ph" oninput="renderDetail(this.value.trim())">
+          </div>
+          <div class="bk-row">
+            <label for="bk-date"><span data-i18n="bk.date">出发日期 / Date</span><span class="req">*</span></label>
+            <input id="bk-date" class="bk-input" type="date">
+          </div>
+
+          <div class="bk-row">
+            <label data-i18n="bk.pax">乘客人数 / Passengers</label>
+            <div id="bk-pax">
+              <div class="bk-pax" data-type="成人" data-price="0">
+                <div><div class="bk-pax-name" data-i18n="bk.adult">成人 Adult</div><div class="bk-pax-price" data-price-label data-i18n="bk.price.tbc">单价：待确认</div></div>
+                <div class="bk-stepper"><button type="button" onclick="step(this,-1)" aria-label="减少 Decrease">−</button><input type="number" min="0" value="0" aria-label="成人人数 Adults" onchange="recalc()"><button type="button" onclick="step(this,1)" aria-label="增加 Increase">+</button></div>
+              </div>
+              <div class="bk-pax" data-type="儿童" data-price="0">
+                <div><div class="bk-pax-name" data-i18n="bk.child">儿童 Child</div><div class="bk-pax-price" data-price-label data-i18n="bk.price.tbc">单价：待确认</div></div>
+                <div class="bk-stepper"><button type="button" onclick="step(this,-1)" aria-label="减少 Decrease">−</button><input type="number" min="0" value="0" aria-label="儿童人数 Children" onchange="recalc()"><button type="button" onclick="step(this,1)" aria-label="增加 Increase">+</button></div>
+              </div>
+              <div class="bk-pax" data-type="婴儿" data-price="0">
+                <div><div class="bk-pax-name" data-i18n="bk.infant">婴儿 Infant</div><div class="bk-pax-price" data-price-label data-i18n="bk.price.tbc">单价：待确认</div></div>
+                <div class="bk-stepper"><button type="button" onclick="step(this,-1)" aria-label="减少 Decrease">−</button><input type="number" min="0" value="0" aria-label="婴儿人数 Infants" onchange="recalc()"><button type="button" onclick="step(this,1)" aria-label="增加 Increase">+</button></div>
+              </div>
+            </div>
+            <div class="bk-note" data-i18n="bk.note">提交后不收取任何费用；所有价格由顾问与您确认后才作数，显示“待确认”的项目顾问会为您报出最新价。</div>
+          </div>
+
+          <div class="bk-subtotal"><span data-i18n="bk.subtotal">预估小计：</span><b id="bk-total" data-i18n="bk.tbc">待确认</b></div>
+
+          <div class="bk-row">
+            <label for="bk-name"><span data-i18n="bk.name">联系人 / Name</span><span class="req">*</span></label>
+            <input id="bk-name" class="bk-input" type="text" placeholder="您的称呼" autocomplete="name">
+          </div>
+          <div class="bk-row">
+            <label for="bk-email" data-i18n="bk.email">客人邮箱 / Email</label>
+            <input id="bk-email" class="bk-input" type="email" placeholder="用于接收确认邮件（选填）" autocomplete="email">
+          </div>
+          <div class="bk-row">
+            <label for="bk-phone"><span data-i18n="bk.phone">联系电话 / Phone</span><span class="req">*</span></label>
+            <input id="bk-phone" class="bk-input" type="tel" placeholder="微信或手机号" autocomplete="tel">
+          </div>
+          <div class="bk-row">
+            <label for="bk-remark" data-i18n="bk.remark">备注 / Remark</label>
+            <textarea id="bk-remark" class="bk-input" rows="3" placeholder="特殊需求、接送地址等"></textarea>
+          </div>
+
+          <div class="bk-actions">
+            <button type="button" class="btn btn-gold" style="flex:1" onclick="submitBookingMail()" data-i18n="bk.submit">提交预订申请（邮件发送）</button>
+          </div>
+          <ul class="bk-assure">
+            <li data-i18n="bk.a1">咨询免费，无需预付</li>
+            <li data-i18n="bk.a2">确认前可随时取消或调整</li>
+            <li data-i18n="bk.a3">顾问一个工作日内回复</li>
+          </ul>
+          <div id="bk-tip" style="text-align:center;margin-top:14px;font-size:14px;color:var(--sky-text)"></div>
+        </div>
+        <div class="bk-alt">
+          <img src="assets/img/qr/wechat-xiaoyi.png" alt="微信客服 小易 二维码">
+          <div class="bk-alt-body">
+            <h2 data-i18n="bk.wx.title" style="font-size:16px;color:var(--navy);margin:0 0 6px;font-weight:700">更习惯用微信？</h2>
+            <p><span data-i18n="bk.wx.p1">扫码或搜索微信号，发送路线名即可咨询。</span><br><b>E_travelink</b>（小易） / <b>E-travelink</b>（小游）</p>
+            <p data-i18n="bk.wx.p2">也可在行程页点击「下载行程单」保存 PDF 后发给顾问。</p>
+          </div>
+        </div>
+        <div id="bk-detail" class="bk-detail" style="margin-top:24px;display:none">
+          <h3 class="bk-detail-title" id="bk-detail-title"></h3>
+          <div id="bk-detail-body"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/region-plans.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function(){
+      const q = new URLSearchParams(location.search);
+      const route = q.get('route') || '';
+      const date = q.get('date') || '';
+      if(route) document.getElementById('bk-route').value = route;
+      if(date) document.getElementById('bk-date').value = date;
+      document.getElementById('bk-date').setAttribute('min', new Date().toISOString().slice(0,10));
+      renderDetail(route);
+      if(typeof emailjs !== 'undefined'){ try{ emailjs.init('nZv17YnCO1xz5uLPZ'); }catch(e){} }
+      window.addEventListener('langchange', function(){ setTimeout(function(){ renderDetail(document.getElementById('bk-route').value.trim()); }, 80); });
+      document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ renderDetail(document.getElementById('bk-route').value.trim()); }, 80); });
+
+      function renderDetail(routeName){
+        const box = document.getElementById('bk-detail');
+        const body = document.getElementById('bk-detail-body');
+        const titleEl = document.getElementById('bk-detail-title');
+        body.innerHTML = '';
+        if(!routeName || !window.REGION_PLANS){ box.style.display='none'; return; }
+        let found = null, fallback = null;
+        const rn = routeName.replace(/【|】|\s/g,'');
+        outer:
+        for(const key in window.REGION_PLANS){
+          const tmp = document.createElement('div');
+          tmp.innerHTML = window.REGION_PLANS[key];
+          const panes = tmp.querySelectorAll('.rp-route-pane');
+          for(const p of panes){
+            const h = p.querySelector('.rp-detail-hero-in h3');
+            const t = h ? h.textContent.replace(/【|】|\s/g,'') : '';
+            if(!t || !rn || t.indexOf(rn) === -1) continue;
+            const isStub = p.textContent.indexOf('详情稍后更新') > -1;
+            if(t === rn && !isStub){ found = p; break outer; }
+            if(!isStub && !found) found = p;
+            if(!fallback) fallback = p;
+          }
+        }
+        if(!found) found = fallback;
+        if(!found){ box.style.display='none'; return; }
+        const title = found.querySelector('.rp-detail-hero-in h3');
+        if(title) titleEl.textContent = '产品详情：' + title.textContent;
+        // 注入价格到乘客步进器
+        const pa = parseFloat(found.getAttribute('data-p-adult'))||0;
+        const pc = parseFloat(found.getAttribute('data-p-child'))||0;
+        const pi = parseFloat(found.getAttribute('data-p-infant'))||0;
+        const paxRows = document.querySelectorAll('#bk-pax .bk-pax');
+        const prices = [pa,pc,pi];
+        paxRows.forEach((r,i)=>{
+          const p = prices[i]||0;
+          r.setAttribute('data-price', p);
+          const lab = r.querySelector('[data-price-label]');
+          const LG=window.I18N[window.Etrips.getLang()];
+          if(lab){
+            if(p>0){ lab.removeAttribute('data-i18n'); lab.textContent = LG['bk.price.prefix'] + p.toFixed(0); }
+            else { lab.setAttribute('data-i18n','bk.price.tbc'); lab.textContent = LG['bk.price.tbc']; }
+          }
+        });
+        const secs = found.querySelectorAll('.rp-sec');
+        if(!secs.length){ box.style.display='none'; return; }
+        secs.forEach(s=> body.appendChild(s.cloneNode(true)));
+        box.style.display = 'block';
+      }
+
+    function step(btn, d){
+      const inp = btn.parentElement.querySelector('input');
+      let v = parseInt(inp.value,10) || 0;
+      v = Math.max(0, v + d);
+      inp.value = v; recalc();
+    }
+    function recalc(){
+      // 单价占位：待确认 -> 小计显示"待确认"
+      const rows = document.querySelectorAll('#bk-pax .bk-pax');
+      let anyQty = false, allKnown = true;
+      rows.forEach(r=>{
+        const n = parseInt(r.querySelector('input').value,10)||0;
+        if(n>0) anyQty = true;
+        const p = parseFloat(r.getAttribute('data-price'))||0;
+        if(n>0 && p===0) allKnown = false;
+      });
+      const total = document.getElementById('bk-total');
+      const LG=window.I18N[window.Etrips.getLang()]; if(!anyQty){ total.textContent = LG['bk.tbc']; return; }
+      if(!allKnown){ total.textContent = LG['bk.tbc.official']; return; }
+      let sum = 0;
+      rows.forEach(r=>{ const n=parseInt(r.querySelector('input').value,10)||0; const p=parseFloat(r.getAttribute('data-price'))||0; sum += n*p; });
+      total.textContent = 'A$ ' + sum.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+    function buildMsg(){
+      const route = document.getElementById('bk-route').value.trim();
+      renderDetail(route); // 提交前按当前路线刷新详情，确保邮件含行程单
+      const date = document.getElementById('bk-date').value;
+      const name = document.getElementById('bk-name').value.trim();
+      const phone = document.getElementById('bk-phone').value.trim();
+      const remark = document.getElementById('bk-remark').value.trim();
+      const email = document.getElementById('bk-email').value.trim();
+      let lines = ['【预订请求】'];
+      if(route) lines.push('路线：' + route);
+      if(date) lines.push('出发日期：' + date);
+      const rows = document.querySelectorAll('#bk-pax .bk-pax');
+      let pax = [];
+      rows.forEach(r=>{ const n=parseInt(r.querySelector('input').value,10)||0; if(n>0) pax.push(r.getAttribute('data-type')+'×'+n); });
+      if(pax.length) lines.push('乘客：' + pax.join('，'));
+      lines.push('联系人：' + (name||'-') + ' / ' + (phone||'-') + (email?' / '+email:''));
+      if(remark) lines.push('备注：' + remark);
+      const total = document.getElementById('bk-total').textContent;
+      lines.push('预估小计：' + total);
+      // 附上产品详情（行程单内容），等效随信附件
+      const detailBody = document.getElementById('bk-detail-body');
+      if(detailBody && detailBody.children.length){
+        lines.push('');
+        lines.push('———— 行程单 ————');
+        detailBody.querySelectorAll('.rp-sec').forEach(sec=>{
+          const h = sec.querySelector('h4'); const p = sec.querySelector('p');
+          if(h) lines.push('\n' + h.textContent);
+          if(p) lines.push(p.textContent.replace(/\s+/g,' ').trim());
+        });
+      }
+      return lines.join('\n');
+    }
+    // 生成行程单 PDF（打印态），返回 Blob 供邮件附件
+    function buildItineraryPDF(){
+      return new Promise((resolve)=>{
+        const detail = document.getElementById('bk-detail');
+        if(!detail || detail.style.display==='none'){ resolve(null); return; }
+        const w = window.open('', '_blank');
+        if(!w){ resolve(null); return; }
+        const css = Array.from(document.styleSheets).map(s=>{ try{return Array.from(s.cssRules).map(r=>r.cssText).join('');}catch(e){return '';} }).join('');
+        w.document.write('<html><head><title>行程单</title><style>'+css+' .bk-detail{box-shadow:none;border:0} @media print{body{print-color-adjust:exact}}</style></head><body>'+detail.innerHTML+'<'+'/body><'+'/html>');
+        w.document.close();
+        setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} resolve(null); }, 600);
+      });
+    }
+    function submitBookingMail(){
+      const tip = document.getElementById('bk-tip');
+      const route = document.getElementById('bk-route').value.trim();
+      const date = document.getElementById('bk-date').value;
+      const phone = document.getElementById('bk-phone').value.trim();
+      if(!route || !date){ tip.style.color='#e23b3b'; tip.textContent='请填写路线与出发日期。'; return; }
+      if(!phone){ tip.style.color='#e23b3b'; tip.textContent='请留下联系电话或微信。'; return; }
+      const name = document.getElementById('bk-name').value.trim();
+      const email = document.getElementById('bk-email').value.trim();
+      const remark = document.getElementById('bk-remark').value.trim();
+      const body = buildMsg();
+      // ---- 真实发送：EmailJS（纯前端）----
+      const EMAILJS = { serviceID:'service_o6p45jq', templateID:'template_yxlb4dp', autoReplyID:'template_p9ks58v', publicKey:'nZv17YnCO1xz5uLPZ', toEmail:'etripsetrips@gmail.com' };
+      if(typeof emailjs === 'undefined'){
+        tip.style.color='#e23b3b';
+        tip.textContent='邮件组件加载失败，请检查网络后重试，或通过微信联系客服。';
+        return;
+      }
+      tip.style.color='#0B6A9E'; tip.textContent='正在发送…';
+      const rows = document.querySelectorAll('#bk-pax .bk-pax');
+      let pax = [];
+      rows.forEach(r=>{ const n=parseInt(r.querySelector('input').value,10)||0; if(n>0) pax.push(r.getAttribute('data-type')+'×'+n); });
+      try {
+        emailjs.send(EMAILJS.serviceID, EMAILJS.templateID, {
+          route: route, date: date, name: name, phone: phone, email: email, remark: remark,
+          pax: pax.join('，'), body: body
+        }).then(()=>{
+          if(email && EMAILJS.autoReplyID){
+            emailjs.send(EMAILJS.serviceID, EMAILJS.autoReplyID, {
+              name: name, email: email, body: body, route: route, date: date
+            }).catch(()=>{});
+          }
+          tip.style.color='#1aa06b'; tip.textContent='预订请求已发送！行程单已随邮件送达，客服将尽快与您确认余位与价格（可扫码添加微信）。';
+        }).catch((err)=>{
+          tip.style.color='#e23b3b'; tip.textContent='发送失败（'+(err&&err.status||'网络')+'），请稍后重试或通过微信联系客服。';
+          console.error(err);
+        });
+      } catch(e){
+        tip.style.color='#e23b3b'; tip.textContent='发送初始化失败：'+(e.message||e)+'，请刷新页面后重试。';
+        console.error(e);
+      }
+    }
+    window.step = step;
+    window.recalc = recalc;
+    window.submitBookingMail = submitBookingMail;
+    window.renderDetail = renderDetail;
+    })();
+  </script>
+  <script src="assets/js/motion.js"></script>
+</body>
+</html>

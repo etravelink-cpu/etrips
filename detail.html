@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/img/logo.png">
+  <title>Etrips 国安易游 | 易行天下，奔赴山海 · 行程详情</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+  <div class="float-bar" id="float-bar"></div>
+
+  <section class="detail-hero">
+    <div class="container">
+      <div id="detail-head"></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:30px">
+    <div class="container">
+      <div class="tabs" id="tabs">
+        <button class="active" data-tab="itinerary" data-i18n="tab.itinerary">行程</button>
+        <button data-tab="hotel" data-i18n="tab.hotel">住宿</button>
+        <button data-tab="extra" data-i18n="tab.extra">额外信息</button>
+        <button data-tab="cancel" data-i18n="tab.cancel">退改政策</button>
+      </div>
+
+      <div class="tab-panel active" id="panel-itinerary"></div>
+      <div class="tab-panel" id="panel-hotel"></div>
+      <div class="tab-panel" id="panel-extra"></div>
+      <div class="tab-panel" id="panel-cancel"></div>
+
+      <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
+        <a href="contact.html" class="btn btn-primary" data-i18n="btn.consult">在线咨询</a>
+        <a href="contact.html" class="btn btn-gold" data-i18n="btn.book">预约占位</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="assets/js/detail.js"></script>
+  <script src="assets/js/motion.js"></script>
+</body>
+</html>

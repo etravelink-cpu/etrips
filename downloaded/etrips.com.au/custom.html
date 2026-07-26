@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/img/logo.png">
+  <title>Etrips 国安易游 | 易行天下，奔赴山海 · 定制游</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+  <div class="float-bar" id="float-bar"></div>
+  <section class="section" style="padding-top:80px">
+    <div class="container">
+      <a href="index.html" style="display:inline-block;margin-bottom:16px;color:#1b4f8a;font-weight:700;text-decoration:none">← 返回首页</a>
+      <h1 class="section-title" data-i18n="custom.title">定制游需求</h1>
+      <div class="form-card">
+        <form onsubmit="return CustomForm.submit(event)">
+          <div class="form-row"><label data-i18n="form.name">姓名</label><input required name="name"></div>
+          <div class="form-row"><label data-i18n="form.phone">电话</label><input name="phone"></div>
+          <div class="form-row"><label data-i18n="form.email">邮箱</label><input name="email" type="email" placeholder="name@example.com"></div>
+          <div class="form-row"><label data-i18n="form.dest">目的地</label>
+            <select name="dest"><option>澳洲境内</option><option>新西兰</option><option>中国全境</option><option>亚洲/海岛</option></select></div>
+          <div class="form-row"><label data-i18n="form.date">出行时间</label><input name="date" type="month"></div>
+          <div class="form-row"><label data-i18n="form.pax">人数</label><input name="pax" type="number" min="1" value="2"></div>
+          <div class="form-row"><label data-i18n="custom.budget">预算</label>
+            <select name="budget"><option>经济</option><option>中端</option><option>高端</option></select></div>
+          <div class="form-row"><label data-i18n="custom.pref">出行偏好</label>
+            <textarea name="pref" rows="3" placeholder="如：亲子、蜜月、摄影、无购物..."></textarea></div>
+          <button class="btn btn-primary" style="width:100%" data-i18n="btn.submit">提交</button>
+        </form>
+        <p id="form-msg" style="margin-top:12px;font-size:14px"></p>
+      </div>
+    </div>
+  </section>
+  <footer class="site-footer" id="site-footer"></footer>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    if(typeof emailjs !== 'undefined'){ try{ emailjs.init('nZv17YnCO1xz5uLPZ'); }catch(e){} }
+    window.CustomForm = {
+      submit(e){
+        e.preventDefault();
+        const l = window.Etrips.getLang();
+        const f = e.target;
+        const tip = document.getElementById('form-msg');
+        const name = f.name.value.trim();
+        const phone = f.phone.value.trim();
+        const email = f.email.value.trim();
+        const dest = f.dest.value;
+        const date = f.date.value;
+        const pax = f.pax.value;
+        const budget = f.budget.value;
+        const pref = f.pref.value.trim();
+        if(!phone && !email){
+          tip.style.color='#e23b3b';
+          tip.textContent = l==='zh' ? '请至少留下电话或邮箱，方便客服与您确认。' : 'Please leave a phone or email so we can reach you.';
+          return false;
+        }
+        let lines = ['【定制游需求】Etrips 国安易游'];
+        if(name) lines.push('称呼：' + name);
+        if(email) lines.push('邮箱：' + email);
+        if(phone) lines.push('联系方式：' + phone);
+        lines.push('目的地：' + dest);
+        if(date) lines.push('出行时间：' + date);
+        if(pax) lines.push('人数：' + pax);
+        if(budget) lines.push('预算：' + budget);
+        if(pref) lines.push('出行偏好：\n' + pref);
+        const body = lines.join('\n');
+        const EMAILJS = { serviceID:'service_o6p45jq', templateID:'template_yxlb4dp', autoReplyID:'template_p9ks58v', publicKey:'nZv17YnCO1xz5uLPZ', toEmail:'etripsetrips@gmail.com' };
+        if(typeof emailjs === 'undefined'){
+          tip.style.color='#e23b3b';
+          tip.textContent = l==='zh' ? '邮件组件加载失败，请检查网络后重试，或扫描页脚二维码加微信客服。' : 'Email module failed to load. Check network or scan footer QR.';
+          return false;
+        }
+        tip.style.color='#0B6A9E'; tip.textContent = l==='zh' ? '正在发送…' : 'Sending…';
+        emailjs.send(EMAILJS.serviceID, EMAILJS.templateID, {
+          route: '定制游需求', date: date, name: name, phone: phone, email: email,
+          remark: (pref ? ('偏好：'+pref+'\n') : '') + '目的地：'+dest+' / 预算：'+budget+' / 人数：'+pax,
+          pax: pax, body: body
+        }).then(()=>{
+          if(email){
+            emailjs.send(EMAILJS.serviceID, EMAILJS.autoReplyID, {
+              name: name, email: email, body: body, route: '定制游需求', date: date
+            }).catch(()=>{});
+          }
+          tip.style.color='#1aa06b';
+          tip.textContent = l==='zh' ? '定制需求已发送！顾问会尽快与您联系可扫码添加微信。' : 'Request sent! An advisor will contact you soon.';
+          f.reset();
+        }).catch((err)=>{
+          tip.style.color='#e23b3b';
+          tip.textContent = l==='zh' ? '发送失败（'+(err&&err.status||'网络')+'），请稍后重试或扫描页脚二维码加微信客服。' : 'Send failed ('+(err&&err.status||'network')+'). Retry or scan footer QR.';
+          console.error(err);
+        });
+        return false;
+      }
+    };
+  </script>
+  <script src="assets/js/motion.js"></script>
+</body>
+</html>

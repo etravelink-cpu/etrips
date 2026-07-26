@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/img/logo.png">
+  <title>Etrips 国安易游 | 易行天下，奔赴山海 · 团期价格</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+  <div class="float-bar" id="float-bar"></div>
+  <section class="section" style="padding-top:80px">
+    <div class="container">
+      <h1 class="section-title" data-i18n="dep.title">团期价格查询</h1>
+      <div class="grid grid-3" id="dep-grid"></div>
+    </div>
+  </section>
+  <footer class="site-footer" id="site-footer"></footer>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script>
+  (function(){
+    const D=window.DEPARTURES,T=window.TOURS,I=window.I18N;
+    function render(){
+      const lang=window.Etrips.getLang();
+      const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      document.getElementById('dep-grid').innerHTML=D.map(d=>{
+        const t=T.find(x=>x.id===d.id)||{nameZh:d.id,nameEn:d.id};
+        const low=d.seats<=3;
+        const seats = low ? (lang==='zh'?'仅余 '+d.seats+' 位':'Only '+d.seats+' left') : (lang==='zh'?d.seats+' 位可订':d.seats+' seats open');
+        const [y,m,day]=d.date.split('-');
+        const mon = lang==='zh' ? (+m)+'月' : MONTHS[+m-1];
+        return `<div class="card dep-card"><div class="body">
+          <div class="dep-top">
+            <span class="dep-date" aria-label="${d.date}"><b>${+day}</b><span>${mon} ${y}</span></span>
+            <div class="dep-info">
+              <h3>${lang==='zh'?t.nameZh:t.nameEn}</h3>
+              <span class="dep-seats${low?' low':''}">${seats}</span>
+            </div>
+          </div>
+          <div class="dep-foot">
+            <span class="dep-price"><i>${lang==='zh'?'每人起':'from pp'}</i>${d.price}</span>
+            <a href="detail.html@id=${d.id}.html" class="btn btn-outline" data-i18n="btn.detail">查看详情</a>
+          </div>
+        </div></div>`;
+      }).join('');
+      window.Etrips.applyLang({ emit: false });
+    }
+    document.addEventListener('DOMContentLoaded',render);
+    window.addEventListener('langchange',render);
+  })();
+  </script>
+  <script src="assets/js/motion.js"></script>
+</body>
+</html>
