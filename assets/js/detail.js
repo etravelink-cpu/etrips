@@ -1,246 +1,180 @@
-// ============================================================
-// detail.js - 产品详情页（完整修复版，含Tab切换）
-// ============================================================
+// Etrips 国安易游 — Detail page (4 tabs + PDF export)
+(function () {
+  const T = window.TOURS,
+    I = window.I18N;
+  let lang = "zh",
+    cur = null;
 
-// ===== 获取产品数据 =====
-function getProduct(id) {
-    const products = window.TOURS || [];
-    return products.find(p => p.id === id);
-}
+  function find() {
+    const id = new URLSearchParams(location.search).get("id");
+    return T.find((t) => t.id === id) || T[0];
+  }
 
-// ===== 渲染行程面板 =====
-function renderItinerary(product) {
-    const panel = document.getElementById('panel-itinerary');
-    if (!panel) return;
-    
-    if (product.itinerary && product.itinerary.length > 0) {
-        panel.innerHTML = `
-            <div class="itinerary" style="display:flex;flex-direction:column;gap:12px;">
-                ${product.itinerary.map(d => `
-                    <div class="day-block" style="display:flex;gap:16px;padding:14px 20px;background:#f8fafc;border-radius:12px;border-left:4px solid #2a7de1;border:1px solid #e8edf4;border-left-width:4px;">
-                        <span class="day-label" style="font-weight:700;color:#2a7de1;min-width:60px;font-size:14px;">Day ${d.day}</span>
-                        <div>
-                            <strong style="color:#0b1a33;font-size:15px;">${d.title}</strong>
-                            <p style="font-size:14px;color:#2c3e5c;margin-top:4px;line-height:1.6;">${d.description || ''}</p>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-        return;
-    }
-    
-    panel.innerHTML = `
-        <div style="padding:8px 0;">
-            <div style="background:#f8fafc;border-radius:12px;padding:20px;border:1px solid #e8edf4;margin-bottom:12px;">
-                <h4 style="color:#0b1a33;margin-bottom:8px;">📋 行程概览</h4>
-                <ul style="list-style:none;padding:0;margin:0;">
-                    <li style="padding:6px 0;border-bottom:1px solid #eef3f9;font-size:14px;color:#2c3e5c;">
-                        <span style="font-weight:600;">📍 目的地：</span> ${product.region || '待确认'}
-                    </li>
-                    <li style="padding:6px 0;border-bottom:1px solid #eef3f9;font-size:14px;color:#2c3e5c;">
-                        <span style="font-weight:600;">📅 行程天数：</span> ${product.duration_days || 0} 天
-                    </li>
-                    <li style="padding:6px 0;border-bottom:1px solid #eef3f9;font-size:14px;color:#2c3e5c;">
-                        <span style="font-weight:600;">🏷️ 团型：</span> ${product.tour_type || '常规'}
-                    </li>
-                    <li style="padding:6px 0;font-size:14px;color:#2c3e5c;">
-                        <span style="font-weight:600;">🏢 供应商：</span> ${product.supplier || '待确认'}
-                    </li>
-                </ul>
-            </div>
-            <div style="background:#fef3e2;border-radius:12px;padding:16px 20px;border:1px solid #fde8c8;">
-                <p style="font-size:14px;color:#b46f1e;margin:0;">💡 详细行程请咨询客服获取</p>
-            </div>
-        </div>
-    `;
-}
+  function renderHead(t) {
+    const tags = [
+      ...new Set(
+        lang === "zh"
+          ? [
+              `${I[lang]["detail.tag.days"]} ${t.days}`,
+              I[lang]["detail.tag.group"],
+              I[lang]["detail.tag.leader"],
+              I[lang]["detail.tag.allinc"],
+              ...t.tags,
+            ]
+          : [
+              `${I[lang]["detail.tag.days"]} ${t.days}`,
+              I[lang]["detail.tag.group"],
+              I[lang]["detail.tag.leader"],
+              I[lang]["detail.tag.allinc"],
+              ...t.tagsEn,
+            ],
+      ),
+    ];
+    const price = lang === "zh" ? t.price : t.priceEn;
+    document.getElementById("detail-head").innerHTML = `
+      <h1>${lang === "zh" ? t.nameZh : t.nameEn}</h1>
+      <div class="muted" style="color:#cdd8e3">${I[lang]["detail.tourid"]}: <b>${t.id}</b></div>
+      <div class="detail-tags">${tags.map((x) => `<span class="tag">${x}</span>`).join("")}</div>
+      <div class="detail-price">${price}</div>
+      <p style="margin-top:10px">
+        <button class="btn btn-gold" onclick="EtripsDetail.downloadPDF()">${I[lang]["btn.download"]}</button>
+      </p>`;
+  }
 
-// ===== 渲染住宿面板 =====
-function renderHotel(product) {
-    const panel = document.getElementById('panel-hotel');
-    if (!panel) return;
-    panel.innerHTML = `
-        <div style="padding:16px 0;">
-            <p style="font-size:14px;color:#2c3e5c;">🏨 住宿安排请咨询客服获取详细信息</p>
-            <p style="font-size:13px;color:#5b6f87;margin-top:8px;">${product.supplier ? '供应商：' + product.supplier : ''}</p>
-        </div>
-    `;
-}
+  function renderItinerary(t) {
+    document.getElementById("panel-itinerary").innerHTML = t.itinerary
+      .map(
+        (d) => `
+      <div class="day">
+        <div class="d">${d.d} · ${lang === "zh" ? d.titleZh : d.titleEn}</div>
+        <div class="line">${lang === "zh" ? d.descZh : d.descEn}</div>
+        <div class="spots">${lang === "zh" ? d.spotsZh.join("　") : d.spotsEn.join("  ")}</div>
+        <div class="line"><b style="color:var(--gold-deep);font-weight:600">${I[lang]["label.transport"]}</b> ${lang === "zh" ? d.transportZh : d.transportEn}</div>
+        <div class="line"><b style="color:var(--gold-deep);font-weight:600">${I[lang]["label.meals"]}</b> ${lang === "zh" ? d.mealZh : d.mealEn}</div>
+        <div class="line"><b style="color:var(--gold-deep);font-weight:600">${I[lang]["label.hotel"]}</b> ${lang === "zh" ? d.hotelZh : d.hotelEn}</div>
+      </div>`,
+      )
+      .join("");
+  }
 
-// ===== 渲染额外信息面板 =====
-function renderExtra(product) {
-    const panel = document.getElementById('panel-extra');
-    if (!panel) return;
-    panel.innerHTML = `
-        <div style="padding:16px 0;">
-            <p style="font-size:14px;color:#2c3e5c;">📋 额外信息</p>
-            <ul style="font-size:13px;color:#5b6f87;margin-top:8px;list-style:none;padding:0;">
-                <li style="padding:4px 0;">🏷️ 产品编号：${product.id || '-'}</li>
-                <li style="padding:4px 0;">🏢 供应商：${product.supplier || '-'}</li>
-                <li style="padding:4px 0;">📍 区域：${product.region || '-'}</li>
-                <li style="padding:4px 0;">📅 天数：${product.duration_days || 0} 天</li>
-                ${product.adult_price ? `<li style="padding:4px 0;">💰 成人价：A$ ${product.adult_price}</li>` : ''}
-                ${product.child_price ? `<li style="padding:4px 0;">🧒 儿童价：A$ ${product.child_price}</li>` : ''}
-                ${product.single_supplement ? `<li style="padding:4px 0;">🛏 单间差：A$ ${product.single_supplement}</li>` : ''}
-            </ul>
-            <p style="font-size:13px;color:#5b6f87;margin-top:12px;padding-top:12px;border-top:1px solid #e8edf4;">💡 以上信息仅供参考，详情请咨询客服</p>
-        </div>
-    `;
-}
+  function renderHotel(t) {
+    document.getElementById("panel-hotel").innerHTML = `
+      <div class="grid grid-2">
+      ${t.hotels
+        .map(
+          (h) => `
+        <div class="card"><div class="body">
+          <h3>${lang === "zh" ? h.nameZh : h.nameEn}</h3>
+          <p class="muted">${lang === "zh" ? h.levelZh : h.levelEn} · ${lang === "zh" ? h.noteZh : h.noteEn}</p>
+        </div></div>`,
+        )
+        .join("")}
+      </div>`;
+  }
 
-// ===== 渲染退改政策面板 =====
-function renderCancel() {
-    const panel = document.getElementById('panel-cancel');
-    if (!panel) return;
-    panel.innerHTML = `
-        <div style="padding:16px 0;">
-            <p style="font-size:14px;color:#2c3e5c;">📋 退改政策</p>
-            <ul style="font-size:13px;color:#5b6f87;margin-top:8px;list-style:none;padding:0;">
-                <li style="padding:4px 0;">• 出发前 30 天以上取消：扣除 10% 手续费</li>
-                <li style="padding:4px 0;">• 出发前 15-29 天取消：扣除 30% 团费</li>
-                <li style="padding:4px 0;">• 出发前 7-14 天取消：扣除 50% 团费</li>
-                <li style="padding:4px 0;">• 出发前 7 天内取消：扣除 100% 团费</li>
-                <li style="padding:4px 0;margin-top:8px;font-size:12px;color:#b33a3a;">⚠️ 具体退改政策以确认单为准</li>
-            </ul>
-        </div>
-    `;
-}
+  function renderExtra(t) {
+    const inc = lang === "zh" ? t.includes : t.includesEn;
+    const exc = lang === "zh" ? t.excludes : t.excludesEn;
+    const not = lang === "zh" ? t.notes : t.notesEn;
+    document.getElementById("panel-extra").innerHTML = `
+      <h3 style="color:var(--navy)">${I[lang]["detail.includes"]}</h3>
+      <ul class="includes">${inc.map((x) => `<li>${x}</li>`).join("")}</ul>
+      <h3 style="color:var(--navy);margin-top:18px">${I[lang]["detail.excludes"]}</h3>
+      <ul class="excludes">${exc.map((x) => `<li>${x}</li>`).join("")}</ul>
+      <h3 style="color:var(--navy);margin-top:18px">${I[lang]["detail.notes"]}</h3>
+      <ul class="notes">${not.map((x) => `<li>${x}</li>`).join("")}</ul>`;
+  }
 
-// ===== 渲染产品详情 =====
-function renderDetail(product) {
-    if (!product) {
-        const head = document.getElementById('detail-head');
-        if (head) head.innerHTML = `
-            <div style="text-align:center;padding:40px 0;">
-                <p style="font-size:18px;color:#5b6f87;">⚠️ 产品未找到</p>
-                <p style="font-size:14px;color:#5b6f87;">请检查产品 ID 是否正确</p>
-                <a href="list.html" style="color:#2a7de1;font-size:14px;">返回列表页</a>
-            </div>
-        `;
-        return;
-    }
-    
-    // ---- 头部信息 ----
-    const head = document.getElementById('detail-head');
-    if (head) {
-        head.innerHTML = `
-            <h1 style="font-size:28px;font-weight:700;color:#0b1a33;margin-bottom:8px;">${product.name || '未命名产品'}</h1>
-            <div class="detail-meta" style="display:flex;flex-wrap:wrap;gap:16px 28px;font-size:14px;color:#5b6f87;margin-bottom:10px;">
-                <span>📍 ${product.region || '多地'}</span>
-                <span>📅 ${product.duration_days || 0} 天</span>
-                <span>💰 ${product.adult_price ? 'A$' + product.adult_price : '价格待询'}</span>
-                <span>🏢 ${product.supplier || ''}</span>
-            </div>
-            <div class="detail-tags" style="display:flex;gap:8px;flex-wrap:wrap;">
-                <span class="tag" style="padding:4px 16px;border-radius:20px;background:#eef3f9;color:#1a3355;font-size:13px;">${product.tour_type || '常规'}</span>
-                ${product.region ? `<span class="tag" style="padding:4px 16px;border-radius:20px;background:#eef3f9;color:#1a3355;font-size:13px;">📍 ${product.region}</span>` : ''}
-                ${product.adult_price ? `<span class="tag" style="padding:4px 16px;border-radius:20px;background:#e3f5ec;color:#0f7b4a;font-size:13px;">A$ ${product.adult_price}</span>` : ''}
-            </div>
-        `;
-    }
-    
-    // ---- 渲染所有面板 ----
-    renderItinerary(product);
-    renderHotel(product);
-    renderExtra(product);
-    renderCancel();
-}
+  function renderCancel(t) {
+    document.getElementById("panel-cancel").innerHTML = `
+      <h3 style="color:var(--navy)">${I[lang]["detail.cancel.title"]}</h3>
+      <ul class="notes">
+        <li>出发前 30 天以上取消：扣除定金 20%。</li>
+        <li>出发前 15-29 天取消：扣除总费用 50%。</li>
+        <li>出发前 7-14 天取消：扣除总费用 70%。</li>
+        <li>出发前 7 天内取消：扣除总费用 100%。</li>
+        <li>以上为通用模板，具体以合同为准。</li>
+      </ul>`;
+  }
 
-// ===== Tab 切换功能 =====
-function initTabs() {
-    const tabButtons = document.querySelectorAll('#tabs .tab-btn, #tabs button');
-    const tabPanels = {
-        'itinerary': document.getElementById('panel-itinerary'),
-        'hotel': document.getElementById('panel-hotel'),
-        'extra': document.getElementById('panel-extra'),
-        'cancel': document.getElementById('panel-cancel')
-    };
-    
-    if (tabButtons.length === 0) {
-        console.warn('⚠️ 没有找到 Tab 按钮');
-        return;
-    }
-    
-    // 隐藏所有面板
-    function hideAllPanels() {
-        Object.keys(tabPanels).forEach(key => {
-            if (tabPanels[key]) {
-                tabPanels[key].style.display = 'none';
-            }
-        });
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-    }
-    
-    // 显示指定面板
-    function showPanel(tabId) {
-        hideAllPanels();
-        if (tabPanels[tabId]) {
-            tabPanels[tabId].style.display = 'block';
-        }
-        tabButtons.forEach(btn => {
-            if (btn.dataset.tab === tabId) {
-                btn.classList.add('active');
-            }
-        });
-    }
-    
-    // 绑定点击事件
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const tabId = this.dataset.tab;
-            if (tabId) {
-                showPanel(tabId);
-                console.log('🔘 切换到 Tab:', tabId);
-            }
-        });
+  function renderAll() {
+    lang = window.Etrips.getLang();
+    cur = find();
+    renderHead(cur);
+    renderItinerary(cur);
+    renderHotel(cur);
+    renderExtra(cur);
+    renderCancel(cur);
+    window.Etrips.applyLang({ emit: false });
+    document
+      .querySelectorAll(
+        'a.btn-primary[href="contact.html"],a.btn-gold[href="contact.html"]',
+      )
+      .forEach((a) => {
+        a.href =
+          "contact.html?route=" +
+          encodeURIComponent(lang === "zh" ? cur.nameZh : cur.nameEn);
+      });
+  }
+
+  // Tabs
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("#tabs button").forEach((b) => {
+      b.addEventListener("click", () => {
+        document
+          .querySelectorAll("#tabs button")
+          .forEach((x) => x.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((x) => x.classList.remove("active"));
+        b.classList.add("active");
+        document
+          .getElementById("panel-" + b.dataset.tab)
+          .classList.add("active");
+      });
     });
-    
-    // 默认显示第一个 Tab（行程）
-    const firstTab = tabButtons.length > 0 ? tabButtons[0].dataset.tab : 'itinerary';
-    showPanel(firstTab);
-    console.log('✅ Tab 切换已初始化，默认显示:', firstTab);
-}
+    renderAll();
+  });
+  window.addEventListener("langchange", renderAll);
 
-// ===== 初始化详情页 =====
-function initDetail() {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
-    
-    if (!id) {
-        const head = document.getElementById('detail-head');
-        if (head) head.innerHTML = `
-            <div style="text-align:center;padding:40px 0;">
-                <p style="font-size:18px;color:#5b6f87;">⚠️ 请指定产品 ID</p>
-                <p style="font-size:14px;color:#5b6f87;">使用 ?id=产品编号 参数访问产品详情</p>
-                <a href="list.html" style="color:#2a7de1;font-size:14px;">返回列表页</a>
-            </div>
-        `;
-        return;
-    }
-    
-    const product = getProduct(id);
-    renderDetail(product);
-    
-    // 渲染完成后初始化 Tab
-    setTimeout(initTabs, 50);
-}
-
-// ===== 监听数据就绪事件 =====
-document.addEventListener('data-ready', function(e) {
-    window.TOURS = e.detail.products || [];
-    initDetail();
-    console.log('📄 详情页已初始化，产品ID:', new URLSearchParams(window.location.search).get('id'));
-});
-
-// ===== DOM 加载完成后初始化 =====
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.TOURS && window.TOURS.length > 0) {
-        initDetail();
-    } else {
-        console.log('⏳ 等待数据加载...');
-    }
-});
-
-console.log('📄 detail.js (完整修复版) 已加载');
+  // PDF export (print-based, no deps)
+  window.EtripsDetail = {
+    downloadPDF() {
+      const t = cur;
+      if (!t) return;
+      const lines = [];
+      lines.push(`Etrips 国安易游 / Etrips Global Easy Travel`);
+      lines.push(`${lang === "zh" ? t.nameZh : t.nameEn}  (${t.id})`);
+      lines.push(
+        `Price: ${lang === "zh" ? t.price : t.priceEn}  |  Days: ${t.days}`,
+      );
+      lines.push("");
+      lines.push(lang === "zh" ? "【每日行程】" : "[Itinerary]");
+      t.itinerary.forEach((d) => {
+        lines.push(`${d.d} ${lang === "zh" ? d.titleZh : d.titleEn}`);
+        lines.push(`  ${lang === "zh" ? d.descZh : d.descEn}`);
+        lines.push(
+          `  景点: ${lang === "zh" ? d.spotsZh.join("、") : d.spotsEn.join(", ")}`,
+        );
+        lines.push(
+          `  ${lang === "zh" ? d.transportZh : d.transportEn} | ${lang === "zh" ? d.mealZh : d.mealEn} | ${lang === "zh" ? d.hotelZh : d.hotelEn}`,
+        );
+      });
+      lines.push("");
+      lines.push(lang === "zh" ? "【费用包含】" : "[Included]");
+      (lang === "zh" ? t.includes : t.includesEn).forEach((x) =>
+        lines.push("  - " + x),
+      );
+      lines.push("");
+      lines.push(lang === "zh" ? "【费用不含】" : "[Excluded]");
+      (lang === "zh" ? t.excludes : t.excludesEn).forEach((x) =>
+        lines.push("  - " + x),
+      );
+      const w = window.open("", "_blank");
+      w.document
+        .write(`<pre style="font-family:monospace;padding:24px;white-space:pre-wrap">${lines.join("\n")}</pre>
+        <script>window.onload=()=>window.print()<\/script>`);
+      w.document.close();
+    },
+  };
+})();
