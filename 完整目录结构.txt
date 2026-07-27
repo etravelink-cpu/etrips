@@ -1,0 +1,21 @@
+D:\www\
+├── etrips\                      # 主项目（新建）
+│   ├── data\                    # JSON数据
+│   ├── assets\                  # CSS/JS/图片
+│   ├── tools\                   # 转换脚本
+│   ├── index.html
+│   ├── china.html
+│   ├── asia.html
+│   └── ...
+│
+├── etrips-api\                  # 可选：API服务（端口8000）
+│   └── ...
+│
+├── etrips-admin\                # 可选：后台管理（端口8080）
+│   └── ...
+│
+├── backup\                      # 备份目录
+│   └── ...
+│
+└── logs\                        # 日志目录
+    └── ...
